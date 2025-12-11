@@ -568,7 +568,6 @@ function openCvModal(allCvResults, initialIndex = 0) {
 // ===============================
 // Download helpers
 // ===============================
-
 function downloadFile(filename, content, type = "application/json") {
   const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
@@ -615,22 +614,11 @@ function convertCvToText(cv) {
 
   return out;
 }
-function downloadFile(filename, content, type = "application/json") {
-  const blob = new Blob([content], { type });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
 
-// Convert recommendations to readable text
 function recommendationsToText(recs) {
   if (!recs || !recs.candidates) return "No recommendations.";
 
   let out = "";
-
   recs.candidates.forEach(c => {
     out += `Candidate: ${c.candidateName}\n`;
     out += `CV Name: ${c.cvName}\n`;
@@ -643,6 +631,7 @@ function recommendationsToText(recs) {
 
   return out;
 }
+
 
 // ---------------------------------------------------------------------------
 // Main bootstrap
@@ -712,14 +701,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     lastRecommendations = allRecommendations;
     saveLastRecommendations(allRecommendations);
-
+    
     displayRecommendations(
       allRecommendations,
       recommendationsContainer,
       resultsSection,
       currentLang
     );
-    saveLastRecommendations(allRecommendations);
+
 
   }
 
@@ -1368,5 +1357,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 });
+
 
 
