@@ -565,6 +565,56 @@ function openCvModal(allCvResults, initialIndex = 0) {
     submitBtn.textContent = modalCvData.length > 1 ? getUiText("submitAll") : getUiText("submitSingle");
   }
 }
+// ===============================
+// Download helpers
+// ===============================
+
+function downloadFile(filename, content, type = "application/json") {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+function convertCvToText(cv) {
+  let out = `CV: ${cv.name}\n\n`;
+
+  if (cv.experience?.length) {
+    out += "Experience:\n";
+    cv.experience.forEach(e => {
+      out += `- ${e.jobTitle || ""} at ${e.company || ""} (${e.years || ""})\n`;
+      if (e.description) out += `  ${e.description}\n`;
+    });
+    out += "\n";
+  }
+
+  if (cv.education?.length) {
+    out += "Education:\n";
+    cv.education.forEach(e => {
+      out += `- ${e.degreeField || ""} at ${e.school || ""}\n`;
+    });
+    out += "\n";
+  }
+
+  if (cv.certifications?.length) {
+    out += "Certifications:\n";
+    cv.certifications.forEach(c => {
+      out += `- ${c.title}\n`;
+    });
+    out += "\n";
+  }
+
+  if (cv.skills?.length) {
+    out += "Skills: " + cv.skills.map(s => s.title).join(", ") + "\n\n";
+  }
+
+  return out;
+}
 
 // ---------------------------------------------------------------------------
 // Main bootstrap
@@ -1133,6 +1183,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
   }
+  // ===============================
+  // Download CVs button
+  // ===============================
+  const downloadBtn = document.getElementById("download-cvs-btn");
+  if (downloadBtn) {
+    downloadBtn.addEventListener("click", () => {
+      if (!submittedCvData || submittedCvData.length === 0) {
+        alert("No CVs to download.");
+        return;
+      }
+  
+      // Download all CVs in one JSON file
+      const json = JSON.stringify(submittedCvData, null, 2);
+      downloadFile("cvs.json", json);
+  
+      // Download each CV as a readable TXT file
+      submittedCvData.forEach(cv => {
+        const txt = convertCvToText(cv);
+        const safeName = cv.name.replace(/\.[^/.]+$/, "");
+        downloadFile(`${safeName}.txt`, txt, "text/plain");
+      });
+    });
+  }
 
   // Modal close behavior
   const closeBtn = document.querySelector(".cv-close-btn");
@@ -1243,3 +1316,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 });
+
