@@ -615,6 +615,34 @@ function convertCvToText(cv) {
 
   return out;
 }
+function downloadFile(filename, content, type = "application/json") {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Convert recommendations to readable text
+function recommendationsToText(recs) {
+  if (!recs || !recs.candidates) return "No recommendations.";
+
+  let out = "";
+
+  recs.candidates.forEach(c => {
+    out += `Candidate: ${c.candidateName}\n`;
+    out += `CV Name: ${c.cvName}\n`;
+    out += `Recommendations:\n`;
+    c.recommendations.forEach((r, idx) => {
+      out += `  ${idx + 1}. ${r}\n`;
+    });
+    out += `\n`;
+  });
+
+  return out;
+}
 
 // ---------------------------------------------------------------------------
 // Main bootstrap
@@ -691,6 +719,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       resultsSection,
       currentLang
     );
+    saveLastRecommendations(allRecommendations);
+
   }
 
   // Helper: rebuild a text blob from structured CV (fallback when raw text not present)
@@ -1219,6 +1249,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     const modal = document.getElementById("cvModal");
     if (modal && e.target === modal) modal.style.display = "none";
   });
+  
+  // ======================================
+  // Download Recommendations Button
+  // ======================================
+  const downloadRecsBtn = document.getElementById("download-recommendations-btn");
+  
+  if (downloadRecsBtn) {
+    downloadRecsBtn.addEventListener("click", () => {
+      if (!lastRecommendations || !lastRecommendations.candidates?.length) {
+        alert("No recommendations available to download.");
+        return;
+      }
+  
+      // 1. Download full JSON
+      const json = JSON.stringify(lastRecommendations, null, 2);
+      downloadFile("recommendations.json", json);
+  
+      // 2. Download human-readable TXT
+      const text = recommendationsToText(lastRecommendations);
+      downloadFile("recommendations.txt", text, "text/plain");
+    });
+  }
 
   // ===========================================================================
   // INTEGRATED: Submit CV review (with modal close and scroll)
@@ -1316,4 +1368,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 });
+
 
