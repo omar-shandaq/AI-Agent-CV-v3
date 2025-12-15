@@ -24,10 +24,15 @@ import {
 // ---------------------------------------------------------------------------
 // Proxy + Gemini call - INTEGRATED: Your proxy function
 // ---------------------------------------------------------------------------
+
+// replace callGeminiProxy to below // START
 export async function callGeminiProxy(payload, onChunk) {
   const response = await fetch(GEMINI_PROXY_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${window.GEMINI_API_KEY}`, // <-- Add this
+    },
     body: JSON.stringify(payload),
   });
 
@@ -55,8 +60,9 @@ export async function callGeminiProxy(payload, onChunk) {
     }
   }
 }
+// END
 
-
+// replace callGeminiAPI to below // START
 export async function callGeminiAPI(userPrompt, history = [], systemPrompt = "", onChunk) {
   const formattedHistory = history.map((msg) => ({
     role: msg.isUser ? "user" : "model",
@@ -77,7 +83,7 @@ export async function callGeminiAPI(userPrompt, history = [], systemPrompt = "",
   await callGeminiProxy(proxyPayload, onChunk);
 }
 
-
+// END
 // ---------------------------------------------------------------------------
 // Chat UI helpers (markdown + typing indicator)
 // ---------------------------------------------------------------------------
@@ -476,4 +482,5 @@ export function displayRecommendations(recommendations, containerEl, resultsSect
 
 // Re-export utility used in UI for CV summary
 export { calculateTotalExperience };
+
 
