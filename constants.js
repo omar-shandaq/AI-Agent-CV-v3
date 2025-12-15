@@ -6,7 +6,7 @@ export const LAST_RECOMMENDATIONS_KEY = "skillMatchLastRecommendations";
 
 // Proxy URL
 export const GEMINI_PROXY_URL = 
-  "https://ai-agent-cv-v3-15-12-git-main-omar-shandaqs-projects.vercel.app/api/chat";
+  "https://ai-agent-cv-v3-15-12-git-main-omar-shandaqs-projects.vercel.app/api/chat.js";
 
 import { loadCertificates, getCertificatesDatabase } from "./certificates-data.js";
 
@@ -43,5 +43,6 @@ export function getDefaultRules(lang = 'en') {
 
 // Keep this for backward compatibility
 export const DEFAULT_RULES = DEFAULT_RULES_EN;
+
 
 
