@@ -24,7 +24,7 @@ import {
 // ---------------------------------------------------------------------------
 // Proxy + Gemini call - INTEGRATED: Your proxy function
 // ---------------------------------------------------------------------------
-export async function callGeminiProxy(payload) {
+export async function callGeminiProxy(payload, onChunk) {
   const response = await fetch(GEMINI_PROXY_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -36,11 +36,28 @@ export async function callGeminiProxy(payload) {
     throw new Error(`Gemini proxy error: ${error || response.statusText}`);
   }
 
-  const data = await response.json();
-  return data.text || "";
+  if (!response.body) {
+    throw new Error("No response body.");
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let done = false;
+
+  while (!done) {
+    const { value, done: doneReading } = await reader.read();
+    done = doneReading;
+    if (value) {
+      const chunk = decoder.decode(value);
+      if (onChunk) {
+        onChunk(chunk);
+      }
+    }
+  }
 }
 
-export async function callGeminiAPI(userPrompt, history = [], systemPrompt = "") {
+
+export async function callGeminiAPI(userPrompt, history = [], systemPrompt = "", onChunk) {
   const formattedHistory = history.map((msg) => ({
     role: msg.isUser ? "user" : "model",
     parts: [{ text: msg.text }],
@@ -56,8 +73,10 @@ export async function callGeminiAPI(userPrompt, history = [], systemPrompt = "")
   ];
 
   const proxyPayload = { prompt: combinedPrompt, history: contents };
-  return await callGeminiProxy(proxyPayload);
+  // Pass onChunk callback to proxy
+  await callGeminiProxy(proxyPayload, onChunk);
 }
+
 
 // ---------------------------------------------------------------------------
 // Chat UI helpers (markdown + typing indicator)
@@ -457,3 +476,4 @@ export function displayRecommendations(recommendations, containerEl, resultsSect
 
 // Re-export utility used in UI for CV summary
 export { calculateTotalExperience };
+
