@@ -31,7 +31,7 @@ export async function callGeminiProxy(payload, onChunk) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${window.GEMINI_API_KEY}`, // <-- Add this
+      "Authorization": `Bearer ${window.GEMINI_API_KEY}`,
     },
     body: JSON.stringify(payload),
   });
@@ -482,5 +482,6 @@ export function displayRecommendations(recommendations, containerEl, resultsSect
 
 // Re-export utility used in UI for CV summary
 export { calculateTotalExperience };
+
 
 
